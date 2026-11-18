@@ -19,12 +19,12 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const App = () => {
-  const [state, dispatch] = useReducer(filesReducer, [], initialState);
+  // Correctly initialize the reducer with the initial state
+  const [state, dispatch] = useReducer(filesReducer, initialState);
   const [isPlaying, setIsPlaying] = useState(false);
   const [basePath, setBasePath] = useState('');
   const [textOutput, setTextOutput] = useState(false);
   const [gridOutput, setGridOutput] = useState(false);
-  registerFrame(window.parent, getConfig('EDITOR_URL'));
 
   function handleMessageEvent(message) {
     const { type, payload } = message;
@@ -52,12 +52,13 @@ const App = () => {
     }
   }
 
+  // Register the frame and set up the message listener once on mount
   useEffect(() => {
+    registerFrame(window.parent, getConfig('EDITOR_URL'));
     const unsubscribe = listen(handleMessageEvent);
-    return function cleanup() {
-      unsubscribe();
-    };
-  });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <React.Fragment>
       <GlobalStyle />
